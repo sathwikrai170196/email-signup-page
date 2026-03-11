@@ -393,23 +393,23 @@
       errEl.style.display = 'none';
 
       try {
-        if (APPS_SCRIPT_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-          throw new Error('Setup required: replace APPS_SCRIPT_URL in the HTML with your Google Apps Script URL.');
+        if (!name || !email || !email.includes('@')) {
+          throw new Error('Please enter a valid name and email address.');
         }
-        const resp = await fetch(APPS_SCRIPT_URL, {
+        // Use no-cors to bypass CORS restriction with Google Apps Script.
+        // The request reaches the sheet even though the response is opaque.
+        // We send as text/plain (required for no-cors simple requests).
+        await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
+          mode: 'no-cors',
           body: JSON.stringify({ name, email }),
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'text/plain' }
         });
-        const result = await resp.json();
-        if (result.status === 'ok' || result.result === 'success') {
-          document.getElementById('form-view').style.display = 'none';
-          document.getElementById('success-view').style.display = 'block';
-        } else {
-          throw new Error(result.error || 'Something went wrong. Please try again.');
-        }
+        // With no-cors the response is opaque — show success optimistically.
+        document.getElementById('form-view').style.display = 'none';
+        document.getElementById('success-view').style.display = 'block';
       } catch (err) {
-        errEl.textContent = err.message;
+        errEl.textContent = 'Network error — please try again or email us at markets@d-daily-drop.in';
         errEl.style.display = 'block';
         btn.disabled = false;
         btn.textContent = 'Get My Free Brief →';
