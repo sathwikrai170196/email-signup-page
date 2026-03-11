@@ -15,7 +15,7 @@
  * 7. Deploy your index.html to Netlify or GitHub Pages (free)
  */
 
-const SHEET_ID  = 'YOUR_GOOGLE_SHEET_ID_HERE';  // ← replace this
+const SHEET_ID  = '1GnfmyK5MokFZptqGzZe3Rr5MvYGPlqq0ic4WNeNuqo4';  // ← replace this
 const SHEET_TAB = 'Sheet1';                       // tab name in your sheet
 
 function doPost(e) {
