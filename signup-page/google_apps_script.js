@@ -20,7 +20,9 @@ const SHEET_TAB = 'Sheet1';                       // tab name in your sheet
 
 function doPost(e) {
   try {
-    const data  = JSON.parse(e.postData.contents);
+    // Works with both application/json and text/plain (no-cors sends text/plain)
+    const body  = e.postData ? e.postData.contents : '';
+    const data  = JSON.parse(body);
     const name  = (data.name  || '').trim();
     const email = (data.email || '').trim();
 
@@ -54,7 +56,7 @@ function doPost(e) {
 }
 
 // Handle CORS preflight
-function doGet(e) {
+function doGet(_e) {
   return jsonResponse({ status: 'ok', message: 'D-Daily-Drop signup endpoint' });
 }
 
