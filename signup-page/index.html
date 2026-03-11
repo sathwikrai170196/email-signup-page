@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D-Daily-Drop — Free Pre-Market Intelligence for Indian Markets</title>
+  <meta name="description" content="Get a free AI-powered pre-market brief every morning — global indices, sector signals, stock picks, and volatility alerts for Indian equity markets.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f172a 100%);
+      padding: 60px 24px 50px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%; transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(59,130,246,0.2);
+      border: 1px solid rgba(59,130,246,0.4);
+      color: #93c5fd;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+      margin-bottom: 18px;
+    }
+    .hero h1 span { color: #60a5fa; }
+    .hero p {
+      font-size: 16px;
+      color: #94a3b8;
+      max-width: 520px;
+      margin: 0 auto 36px;
+      line-height: 1.65;
+    }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 440px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .form-card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .form-card .sub {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 24px;
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: #f8fafc;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus { border-color: #3b82f6; }
+    .form-group input::placeholder { color: #475569; }
+
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: opacity 0.2s, transform 0.1s;
+      letter-spacing: 0.01em;
+    }
+    .submit-btn:hover { opacity: 0.92; }
+    .submit-btn:active { transform: scale(0.99); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .privacy {
+      font-size: 11px;
+      color: #475569;
+      text-align: center;
+      margin-top: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── SUCCESS STATE ── */
+    .success-box {
+      display: none;
+      text-align: center;
+      padding: 8px 0;
+    }
+    .success-box .check {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+    .success-box h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .success-box p  { font-size: 14px; color: #94a3b8; line-height: 1.6; }
+
+    /* ── FEATURES ── */
+    .features {
+      padding: 60px 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .features h2 {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 36px;
+      color: #e2e8f0;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .feature-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 22px 20px;
+    }
+    .feature-icon { font-size: 28px; margin-bottom: 12px; }
+    .feature-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 7px; color: #e2e8f0; }
+    .feature-card p  { font-size: 13px; color: #64748b; line-height: 1.6; }
+
+    /* ── SAMPLE EMAIL PREVIEW ── */
+    .preview-section {
+      padding: 0 24px 60px;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .preview-section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #e2e8f0;
+    }
+    .preview-section p {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 28px;
+    }
+    .email-preview {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      overflow: hidden;
+      text-align: left;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .preview-header {
+      background: linear-gradient(135deg, #0f172a, #1e3a5f);
+      padding: 18px 22px;
+    }
+    .preview-header .title { font-size: 16px; font-weight: 800; color: #f8fafc; }
+    .preview-header .date  { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+    .preview-regime {
+      background: #16a34a;
+      padding: 8px 22px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .preview-body { padding: 18px 22px; }
+    .preview-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+    }
+    .preview-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 7px 0;
+      border-bottom: 1px solid #334155;
+      font-size: 12px;
+    }
+    .preview-row:last-child { border-bottom: none; }
+    .preview-row .label { color: #94a3b8; }
+    .preview-row .val-green { color: #4ade80; font-family: monospace; font-weight: 700; }
+    .preview-row .val-red   { color: #f87171; font-family: monospace; font-weight: 700; }
+    .preview-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-right: 3px;
+    }
+    .tag-intraday { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+
+    /* ── FOOTER ── */
+    .footer {
+      border-top: 1px solid #1e293b;
+      padding: 28px 24px;
+      text-align: center;
+      font-size: 12px;
+      color: #475569;
+    }
+
+    /* ── ERROR ── */
+    .error-msg {
+      display: none;
+      background: #450a0a;
+      border: 1px solid #991b1b;
+      color: #fca5a5;
+      font-size: 12px;
+      padding: 10px 14px;
+      border-radius: 7px;
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="badge">📬 Free Daily Email &nbsp;·&nbsp; No Spam</div>
+    <h1>Your <span>Pre-Market Edge</span><br>Every Morning at 7:30 AM</h1>
+    <p>AI-powered intelligence brief for Indian equity markets — global indices, sector signals, stock-specific catalysts, and intraday volatility alerts. In your inbox before the bell rings.</p>
+
+    <div class="form-card">
+      <div id="form-view">
+        <h2>📈 Join Free</h2>
+        <p class="sub">Delivered Monday–Friday before market open</p>
+
+        <form id="signup-form">
+          <div class="form-group">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" name="name" placeholder="Rahul Sharma" required autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="you@gmail.com" required autocomplete="email">
+          </div>
+          <button type="submit" class="submit-btn" id="submit-btn">
+            Get My Free Brief →
+          </button>
+          <div class="error-msg" id="error-msg"></div>
+        </form>
+
+        <p class="privacy">🔒 No spam. Unsubscribe anytime.<br>Educational content only — not investment advice.</p>
+      </div>
+
+      <div class="success-box" id="success-view">
+        <div class="check">✅</div>
+        <h3>You're on the list!</h3>
+        <p>Watch for your first Pre-Market Intelligence Brief tomorrow morning.<br><br>
+        <strong>Share with a friend who trades:</strong><br>
+        <span id="share-url" style="color:#60a5fa;font-size:12px;word-break:break-all"></span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <h2>What's inside every brief?</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <h3>Global Overnight Snapshot</h3>
+        <p>Actual closing levels for S&P 500, Nasdaq, Nikkei, Hang Seng, Dow Jones — plus USD Index and Oil. No ETF proxies.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Sector Signals</h3>
+        <p>Which sectors face tailwinds or headwinds today — with the specific global driver and a named Indian stock for each.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🗞️</div>
+        <h3>Key Catalysts</h3>
+        <p>3 most market-moving headlines with direct investment implications — regulatory changes, govt policy, FII flows, earnings.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <h3>Stocks to Watch</h3>
+        <p>One large cap, mid cap, small cap, and wildcard — each with a specific catalyst type and what to observe in today's session.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Volatility Plays</h3>
+        <p>2–3 high-beta stocks with near-term triggers for outsized moves — built for intraday traders who want to catch the action.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3>One Thing to Watch</h3>
+        <p>The single most critical stock and catalyst for the day — specific, concrete, and actionable. Not a generic market statement.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PREVIEW -->
+  <section class="preview-section">
+    <h2>Looks like this in your inbox</h2>
+    <p>Clean, colourful, built for quick scanning before the 9:15 AM bell</p>
+    <div class="email-preview">
+      <div class="preview-header">
+        <div class="title">📈 Pre-Market Intelligence</div>
+        <div class="date">🗓️ Today &nbsp;·&nbsp; 🇮🇳 Indian Equity Markets</div>
+      </div>
+      <div class="preview-regime">🟢 Market Regime: Cautiously Bullish &nbsp;·&nbsp; Score: 6.2/10</div>
+      <div class="preview-body">
+        <div class="preview-section-label">🌍 Overnight Global Snapshot</div>
+        <div class="preview-row"><span class="label">🇺🇸 S&P 500</span><span class="val-green">▲ +0.82%</span></div>
+        <div class="preview-row"><span class="label">💻 Nasdaq</span><span class="val-green">▲ +1.14%</span></div>
+        <div class="preview-row"><span class="label">🇯🇵 Nikkei</span><span class="val-red">▼ −0.31%</span></div>
+        <div class="preview-row"><span class="label">🛢️ Oil (Brent)</span><span class="val-green">▲ +0.55%</span></div>
+        <br>
+        <div class="preview-section-label">⚡ Volatility Plays <span class="preview-tag tag-intraday">Intraday Alert</span></div>
+        <div style="font-size:12px;color:#94a3b8;line-height:1.6">
+          <strong style="color:#f97316">Tata Motors</strong> — F&O expiry + EV sales data due; watch for volume spike in first 30 min...<br><br>
+          <strong style="color:#f97316">Indusind Bank</strong> — Block deal rumours circulating; circuit risk if confirmed...
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>D-Daily-Drop &nbsp;·&nbsp; markets@d-daily-drop.in</p>
+    <p style="margin-top:6px">Educational content only. Not investment advice. Consult a SEBI-registered advisor.</p>
+  </footer>
+
+  <script>
+    // ── Replace this URL with your Google Apps Script Web App URL ──
+    // See README instructions below to set this up (takes ~5 minutes)
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3jQh1gLCPoEx4vXz83cFLicXos8-NnM2RsCSQBzeNlz2BPySpcUvwfkrNTVB0ETyc/exec';
+
+    document.getElementById('share-url').textContent = window.location.href;
+
+    document.getElementById('signup-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn   = document.getElementById('submit-btn');
+      const errEl = document.getElementById('error-msg');
+      const name  = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+
+      btn.disabled = true;
+      btn.textContent = 'Subscribing...';
+      errEl.style.display = 'none';
+
+      try {
+        if (APPS_SCRIPT_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+          throw new Error('Setup required: replace APPS_SCRIPT_URL in the HTML with your Google Apps Script URL.');
+        }
+        const resp = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ name, email }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await resp.json();
+        if (result.status === 'ok' || result.result === 'success') {
+          document.getElementById('form-view').style.display = 'none';
+          document.getElementById('success-view').style.display = 'block';
+        } else {
+          throw new Error(result.error || 'Something went wrong. Please try again.');
+        }
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Get My Free Brief →';
+      }
+    });
+  </script>
+
+</body>
+</html>
