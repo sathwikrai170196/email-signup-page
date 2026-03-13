@@ -1,421 +1,573 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>D-Daily-Drop — Free Pre-Market Intelligence for Indian Markets</title>
-  <meta name="description" content="Get a free AI-powered pre-market brief every morning — global indices, sector signals, stock picks, and volatility alerts for Indian equity markets.">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>D-Daily Drop — Analytics</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:      #0f172a;
+    --surface: #1e293b;
+    --border:  #334155;
+    --text:    #e2e8f0;
+    --muted:   #94a3b8;
+    --accent:  #38bdf8;
+    --green:   #22c55e;
+    --red:     #ef4444;
+    --amber:   #f59e0b;
+    --purple:  #a78bfa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-      background: #0f172a;
-      color: #f8fafc;
-      min-height: 100vh;
-    }
+  /* ── Header ── */
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
+  .brand  { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.03em; }
+  .brand span { color: var(--accent); }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .last-updated { font-size: 12px; color: var(--muted); }
+  .btn-refresh { background: var(--accent); color: #0f172a; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .btn-refresh:hover { opacity: 0.85; }
 
-    /* ── HERO ── */
-    .hero {
-      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f172a 100%);
-      padding: 60px 24px 50px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: -60px; left: 50%; transform: translateX(-50%);
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .badge {
-      display: inline-block;
-      background: rgba(59,130,246,0.2);
-      border: 1px solid rgba(59,130,246,0.4);
-      color: #93c5fd;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 5px 14px;
-      border-radius: 20px;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-bottom: 20px;
-    }
-    .hero h1 {
-      font-size: clamp(28px, 5vw, 48px);
-      font-weight: 800;
-      line-height: 1.15;
-      letter-spacing: -0.5px;
-      margin-bottom: 18px;
-    }
-    .hero h1 span { color: #60a5fa; }
-    .hero p {
-      font-size: 16px;
-      color: #94a3b8;
-      max-width: 520px;
-      margin: 0 auto 36px;
-      line-height: 1.65;
-    }
+  /* ── Layout ── */
+  .main  { max-width: 1200px; margin: 0 auto; padding: 24px 24px 48px; }
 
-    /* ── FORM CARD ── */
-    .form-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 32px;
-      max-width: 440px;
-      margin: 0 auto;
-      position: relative;
-    }
-    .form-card h2 {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-    .form-card .sub {
-      font-size: 13px;
-      color: #64748b;
-      margin-bottom: 24px;
-    }
-    .form-group { margin-bottom: 14px; }
-    .form-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 6px;
-    }
-    .form-group input {
-      width: 100%;
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-size: 14px;
-      color: #f8fafc;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .form-group input:focus { border-color: #3b82f6; }
-    .form-group input::placeholder { color: #475569; }
+  /* ── Settings banner ── */
+  .settings-banner { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; }
+  .settings-title  { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .settings-grid   { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+  .settings-field  { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 200px; }
+  .settings-label  { font-size: 11px; color: var(--muted); }
+  .settings-input  { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 7px 10px; border-radius: 6px; font-size: 12px; width: 100%; }
+  .settings-input:focus { outline: none; border-color: var(--accent); }
+  .btn-save { background: #334155; color: var(--text); border: none; padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .btn-save:hover { background: #475569; }
 
-    .submit-btn {
-      width: 100%;
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 14px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 6px;
-      transition: opacity 0.2s, transform 0.1s;
-      letter-spacing: 0.01em;
-    }
-    .submit-btn:hover { opacity: 0.92; }
-    .submit-btn:active { transform: scale(0.99); }
-    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  /* ── Metric Cards ── */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .card  { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .card-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .card-value { font-size: 32px; font-weight: 800; color: #fff; line-height: 1; margin-bottom: 4px; }
+  .card-sub   { font-size: 12px; color: var(--muted); }
+  .card-accent { border-top: 3px solid var(--accent); }
+  .card-green  { border-top: 3px solid var(--green); }
+  .card-amber  { border-top: 3px solid var(--amber); }
+  .card-purple { border-top: 3px solid var(--purple); }
 
-    .privacy {
-      font-size: 11px;
-      color: #475569;
-      text-align: center;
-      margin-top: 14px;
-      line-height: 1.5;
-    }
+  /* ── Charts ── */
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .chart-full  { grid-column: 1 / -1; }
+  .chart-card  { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .chart-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .chart-sub   { font-size: 11px; color: var(--muted); margin-bottom: 16px; }
+  .chart-wrap  { position: relative; height: 220px; }
 
-    /* ── SUCCESS STATE ── */
-    .success-box {
-      display: none;
-      text-align: center;
-      padding: 8px 0;
-    }
-    .success-box .check {
-      font-size: 48px;
-      margin-bottom: 12px;
-    }
-    .success-box h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-    .success-box p  { font-size: 14px; color: #94a3b8; line-height: 1.6; }
+  /* ── Table ── */
+  .table-card  { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .table-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { padding: 8px 10px; text-align: left; font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 10px; border-bottom: 1px solid #1e293b; }
+  tr:last-child td { border-bottom: none; }
+  .up   { color: var(--green); font-weight: 700; }
+  .dn   { color: var(--red);   font-weight: 700; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+  .pill-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+  .pill-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+  .pill-amber  { background: rgba(245,158,11,0.15); color: var(--amber); }
 
-    /* ── FEATURES ── */
-    .features {
-      padding: 60px 24px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    .features h2 {
-      text-align: center;
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 36px;
-      color: #e2e8f0;
-    }
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-    }
-    .feature-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 22px 20px;
-    }
-    .feature-icon { font-size: 28px; margin-bottom: 12px; }
-    .feature-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 7px; color: #e2e8f0; }
-    .feature-card p  { font-size: 13px; color: #64748b; line-height: 1.6; }
+  /* ── Loading / Error ── */
+  .loading { color: var(--muted); font-size: 13px; padding: 16px 0; }
+  .error   { color: var(--red);   font-size: 12px; padding: 8px 0; }
 
-    /* ── SAMPLE EMAIL PREVIEW ── */
-    .preview-section {
-      padding: 0 24px 60px;
-      max-width: 900px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .preview-section h2 {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: #e2e8f0;
-    }
-    .preview-section p {
-      font-size: 14px;
-      color: #64748b;
-      margin-bottom: 28px;
-    }
-    .email-preview {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      overflow: hidden;
-      text-align: left;
-      max-width: 520px;
-      margin: 0 auto;
-    }
-    .preview-header {
-      background: linear-gradient(135deg, #0f172a, #1e3a5f);
-      padding: 18px 22px;
-    }
-    .preview-header .title { font-size: 16px; font-weight: 800; color: #f8fafc; }
-    .preview-header .date  { font-size: 11px; color: #94a3b8; margin-top: 3px; }
-    .preview-regime {
-      background: #16a34a;
-      padding: 8px 22px;
-      font-size: 12px;
-      font-weight: 700;
-      color: #fff;
-    }
-    .preview-body { padding: 18px 22px; }
-    .preview-section-label {
-      font-size: 10px;
-      font-weight: 700;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 10px;
-    }
-    .preview-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 7px 0;
-      border-bottom: 1px solid #334155;
-      font-size: 12px;
-    }
-    .preview-row:last-child { border-bottom: none; }
-    .preview-row .label { color: #94a3b8; }
-    .preview-row .val-green { color: #4ade80; font-family: monospace; font-weight: 700; }
-    .preview-row .val-red   { color: #f87171; font-family: monospace; font-weight: 700; }
-    .preview-tag {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 1px 6px;
-      border-radius: 4px;
-      margin-right: 3px;
-    }
-    .tag-intraday { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
-
-    /* ── FOOTER ── */
-    .footer {
-      border-top: 1px solid #1e293b;
-      padding: 28px 24px;
-      text-align: center;
-      font-size: 12px;
-      color: #475569;
-    }
-
-    /* ── ERROR ── */
-    .error-msg {
-      display: none;
-      background: #450a0a;
-      border: 1px solid #991b1b;
-      color: #fca5a5;
-      font-size: 12px;
-      padding: 10px 14px;
-      border-radius: 7px;
-      margin-top: 10px;
-      text-align: center;
-    }
-  </style>
+  @media (max-width: 640px) {
+    .charts { grid-template-columns: 1fr; }
+    .chart-full { grid-column: 1; }
+    .settings-grid { flex-direction: column; }
+  }
+</style>
 </head>
 <body>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="badge">📬 Free Daily Email &nbsp;·&nbsp; No Spam</div>
-    <h1>Your <span>Pre-Market Edge</span><br>Every Morning at 7:30 AM</h1>
-    <p>AI-powered intelligence brief for Indian equity markets — global indices, sector signals, stock-specific catalysts, and intraday volatility alerts. In your inbox before the bell rings.</p>
+<!-- HEADER -->
+<div class="header">
+  <div class="brand">D<span>-</span>Daily Drop <span style="font-size:13px;font-weight:500;color:var(--muted);margin-left:8px;">Analytics</span></div>
+  <div class="header-right">
+    <span class="last-updated" id="last-updated">Loading...</span>
+    <button class="btn-refresh" onclick="loadAll()">Refresh</button>
+  </div>
+</div>
 
-    <div class="form-card">
-      <div id="form-view">
-        <h2>📈 Join Free</h2>
-        <p class="sub">Delivered Monday–Friday before market open</p>
+<div class="main">
 
-        <form id="signup-form">
-          <div class="form-group">
-            <label for="name">Your Name</label>
-            <input type="text" id="name" name="name" placeholder="Rahul Sharma" required autocomplete="name">
-          </div>
-          <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" placeholder="you@gmail.com" required autocomplete="email">
-          </div>
-          <button type="submit" class="submit-btn" id="submit-btn">
-            Get My Free Brief →
-          </button>
-          <div class="error-msg" id="error-msg"></div>
-        </form>
-
-        <p class="privacy">🔒 No spam. Unsubscribe anytime.<br>Educational content only — not investment advice.</p>
+  <!-- SETTINGS -->
+  <div class="settings-banner">
+    <div class="settings-title">Configuration (saved in browser only)</div>
+    <div class="settings-grid">
+      <div class="settings-field">
+        <div class="settings-label">Apps Script URL (for open stats)</div>
+        <input class="settings-input" id="cfg-apps-script" type="text"
+               placeholder="https://script.google.com/macros/s/.../exec"/>
       </div>
-
-      <div class="success-box" id="success-view">
-        <div class="check">✅</div>
-        <h3>You're on the list!</h3>
-        <p>Watch for your first Pre-Market Intelligence Brief tomorrow morning.<br><br>
-        <strong>Share with a friend who trades:</strong><br>
-        <span id="share-url" style="color:#60a5fa;font-size:12px;word-break:break-all"></span></p>
+      <div class="settings-field">
+        <div class="settings-label">Resend API Key (for email stats)</div>
+        <input class="settings-input" id="cfg-resend-key" type="password"
+               placeholder="re_..."/>
       </div>
+      <div class="settings-field">
+        <div class="settings-label">n8n API Key (for execution count)</div>
+        <input class="settings-input" id="cfg-n8n-key" type="password"
+               placeholder="eyJhbGci..."/>
+      </div>
+      <button class="btn-save" onclick="saveConfig()">Save &amp; Reload</button>
     </div>
-  </section>
+  </div>
 
-  <!-- FEATURES -->
-  <section class="features">
-    <h2>What's inside every brief?</h2>
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="feature-icon">🌍</div>
-        <h3>Global Overnight Snapshot</h3>
-        <p>Actual closing levels for S&P 500, Nasdaq, Nikkei, Hang Seng, Dow Jones — plus USD Index and Oil. No ETF proxies.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📊</div>
-        <h3>Sector Signals</h3>
-        <p>Which sectors face tailwinds or headwinds today — with the specific global driver and a named Indian stock for each.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🗞️</div>
-        <h3>Key Catalysts</h3>
-        <p>3 most market-moving headlines with direct investment implications — regulatory changes, govt policy, FII flows, earnings.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📈</div>
-        <h3>Stocks to Watch</h3>
-        <p>One large cap, mid cap, small cap, and wildcard — each with a specific catalyst type and what to observe in today's session.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">⚡</div>
-        <h3>Volatility Plays</h3>
-        <p>2–3 high-beta stocks with near-term triggers for outsized moves — built for intraday traders who want to catch the action.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🎯</div>
-        <h3>One Thing to Watch</h3>
-        <p>The single most critical stock and catalyst for the day — specific, concrete, and actionable. Not a generic market statement.</p>
-      </div>
+  <!-- METRIC CARDS -->
+  <div class="cards">
+    <div class="card card-accent">
+      <div class="card-label">Total Subscribers</div>
+      <div class="card-value" id="stat-subscribers">—</div>
+      <div class="card-sub" id="stat-sub-growth">Loading...</div>
     </div>
-  </section>
-
-  <!-- PREVIEW -->
-  <section class="preview-section">
-    <h2>Looks like this in your inbox</h2>
-    <p>Clean, colourful, built for quick scanning before the 9:15 AM bell</p>
-    <div class="email-preview">
-      <div class="preview-header">
-        <div class="title">📈 Pre-Market Intelligence</div>
-        <div class="date">🗓️ Today &nbsp;·&nbsp; 🇮🇳 Indian Equity Markets</div>
-      </div>
-      <div class="preview-regime">🟢 Market Regime: Cautiously Bullish &nbsp;·&nbsp; Score: 6.2/10</div>
-      <div class="preview-body">
-        <div class="preview-section-label">🌍 Overnight Global Snapshot</div>
-        <div class="preview-row"><span class="label">🇺🇸 S&P 500</span><span class="val-green">▲ +0.82%</span></div>
-        <div class="preview-row"><span class="label">💻 Nasdaq</span><span class="val-green">▲ +1.14%</span></div>
-        <div class="preview-row"><span class="label">🇯🇵 Nikkei</span><span class="val-red">▼ −0.31%</span></div>
-        <div class="preview-row"><span class="label">🛢️ Oil (Brent)</span><span class="val-green">▲ +0.55%</span></div>
-        <br>
-        <div class="preview-section-label">⚡ Volatility Plays <span class="preview-tag tag-intraday">Intraday Alert</span></div>
-        <div style="font-size:12px;color:#94a3b8;line-height:1.6">
-          <strong style="color:#f97316">Tata Motors</strong> — F&O expiry + EV sales data due; watch for volume spike in first 30 min...<br><br>
-          <strong style="color:#f97316">Indusind Bank</strong> — Block deal rumours circulating; circuit risk if confirmed...
-        </div>
-      </div>
+    <div class="card card-green">
+      <div class="card-label">Pick Accuracy (all time)</div>
+      <div class="card-value" id="stat-accuracy">—</div>
+      <div class="card-sub" id="stat-acc-sub">picks tracked</div>
     </div>
-  </section>
+    <div class="card card-amber">
+      <div class="card-label">Emails Sent (total)</div>
+      <div class="card-value" id="stat-sends">—</div>
+      <div class="card-sub" id="stat-sends-sub">via Resend</div>
+    </div>
+    <div class="card card-purple">
+      <div class="card-label">Email Opens Tracked</div>
+      <div class="card-value" id="stat-opens">—</div>
+      <div class="card-sub" id="stat-opens-sub">tracking pixel</div>
+    </div>
+  </div>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <p>D-Daily-Drop &nbsp;·&nbsp; markets@d-daily-drop.in</p>
-    <p style="margin-top:6px">Educational content only. Not investment advice. Consult a SEBI-registered advisor.</p>
-  </footer>
+  <!-- CHARTS ROW 1 -->
+  <div class="charts">
+    <div class="chart-card chart-full">
+      <div class="chart-title">Subscriber Growth</div>
+      <div class="chart-sub">New signups per day</div>
+      <div class="chart-wrap"><canvas id="chart-growth"></canvas></div>
+    </div>
+  </div>
 
-  <script>
-    // ── Replace this URL with your Google Apps Script Web App URL ──
-    // See README instructions below to set this up (takes ~5 minutes)
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3jQh1gLCPoEx4vXz83cFLicXos8-NnM2RsCSQBzeNlz2BPySpcUvwfkrNTVB0ETyc/exec';
+  <!-- CHARTS ROW 2 -->
+  <div class="charts">
+    <div class="chart-card">
+      <div class="chart-title">Daily Pick Accuracy</div>
+      <div class="chart-sub">% of picks that closed positive</div>
+      <div class="chart-wrap"><canvas id="chart-accuracy"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Email Opens Per Day</div>
+      <div class="chart-sub">Opens tracked via pixel</div>
+      <div class="chart-wrap"><canvas id="chart-opens"></canvas></div>
+    </div>
+  </div>
 
-    document.getElementById('share-url').textContent = window.location.href;
+  <!-- RECENT PICKS TABLE -->
+  <div class="table-card">
+    <div class="table-title">Recent Pick Performance</div>
+    <table id="perf-table">
+      <thead>
+        <tr>
+          <th>Date</th><th>Ticker</th><th>Name</th>
+          <th>Entry</th><th>Exit</th><th>Change</th><th>Result</th>
+        </tr>
+      </thead>
+      <tbody id="perf-tbody">
+        <tr><td colspan="7" class="loading">Loading performance data...</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-    document.getElementById('signup-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const btn   = document.getElementById('submit-btn');
-      const errEl = document.getElementById('error-msg');
-      const name  = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
+</div>
 
-      btn.disabled = true;
-      btn.textContent = 'Subscribing...';
-      errEl.style.display = 'none';
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+const SHEET_ID   = '1GnfmyK5MokFZptqGzZe3Rr5MvYGPlqq0ic4WNeNuqo4';
+const N8N_BASE   = 'https://mlpnko.space';
+const WORKFLOW_ID= 'yuGAqNi49BEprLFj';
 
-      try {
-        if (!name || !email || !email.includes('@')) {
-          throw new Error('Please enter a valid name and email address.');
+function getConfig() {
+  return {
+    appsScript: localStorage.getItem('ddrop_apps_script') || '',
+    resendKey:  localStorage.getItem('ddrop_resend_key')  || '',
+    n8nKey:     localStorage.getItem('ddrop_n8n_key')     || ''
+  };
+}
+
+function saveConfig() {
+  const as = document.getElementById('cfg-apps-script').value.trim();
+  const rk = document.getElementById('cfg-resend-key').value.trim();
+  const nk = document.getElementById('cfg-n8n-key').value.trim();
+  if (as) localStorage.setItem('ddrop_apps_script', as);
+  if (rk) localStorage.setItem('ddrop_resend_key', rk);
+  if (nk) localStorage.setItem('ddrop_n8n_key', nk);
+  loadAll();
+}
+
+function populateConfigInputs() {
+  const cfg = getConfig();
+  if (cfg.appsScript) document.getElementById('cfg-apps-script').value = cfg.appsScript;
+  if (cfg.resendKey)  document.getElementById('cfg-resend-key').value  = '••••••••';
+  if (cfg.n8nKey)     document.getElementById('cfg-n8n-key').value     = '••••••••';
+}
+
+// ── Chart instances (track for destroy/re-render) ─────────────────────────────
+const charts = {};
+function makeChart(id, config) {
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id), config);
+}
+
+const CHART_DEFAULTS = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1e293b' } },
+    y: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1e293b' } }
+  }
+};
+
+// ── Parse Google Sheets CSV ───────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const header = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+  return lines.slice(1).map(line => {
+    // Simple CSV parse (handles quoted fields with commas)
+    const vals = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
+      else { cur += c; }
+    }
+    vals.push(cur.trim());
+    const obj = {};
+    header.forEach((h, i) => { obj[h] = (vals[i] || '').replace(/"/g, ''); });
+    return obj;
+  });
+}
+
+function fetchCSV(gid) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
+  return fetch(url).then(r => { if (!r.ok) throw new Error('Sheet not accessible'); return r.text(); });
+}
+
+// ── 1. Subscribers ────────────────────────────────────────────────────────────
+async function loadSubscribers() {
+  try {
+    const text = await fetchCSV(0); // gid=0 is Sheet1
+    const rows = parseCSV(text).filter(r => {
+      const email = r['Email id'] || r['email'] || Object.values(r)[1] || '';
+      return email.includes('@');
+    });
+
+    document.getElementById('stat-subscribers').textContent = rows.length.toLocaleString();
+
+    // Group by date for growth chart
+    const byDate = {};
+    rows.forEach(r => {
+      const dateVal = r['Date'] || r['date'] || Object.values(r)[3] || '';
+      const d = dateVal.split('T')[0].split(' ')[0];
+      if (d) byDate[d] = (byDate[d] || 0) + 1;
+    });
+
+    const sortedDates = Object.keys(byDate).sort();
+    const growthSub = sortedDates.length > 0
+      ? `+${byDate[sortedDates[sortedDates.length-1]]} today`
+      : 'from Google Sheets';
+    document.getElementById('stat-sub-growth').textContent = growthSub;
+
+    // Cumulative growth
+    let cum = 0;
+    const cumData = sortedDates.map(d => { cum += byDate[d]; return cum; });
+
+    makeChart('chart-growth', {
+      type: 'bar',
+      data: {
+        labels: sortedDates.map(d => d.slice(5)),
+        datasets: [
+          {
+            type: 'bar',
+            label: 'New Signups',
+            data: sortedDates.map(d => byDate[d]),
+            backgroundColor: 'rgba(56,189,248,0.4)',
+            borderColor: '#38bdf8',
+            borderWidth: 1,
+            yAxisID: 'y'
+          },
+          {
+            type: 'line',
+            label: 'Total',
+            data: cumData,
+            borderColor: '#a78bfa',
+            borderWidth: 2,
+            pointRadius: 2,
+            fill: false,
+            yAxisID: 'y2',
+            tension: 0.3
+          }
+        ]
+      },
+      options: {
+        ...CHART_DEFAULTS,
+        plugins: { legend: { display: true, labels: { color: '#94a3b8', boxWidth: 12, font: { size: 11 } } } },
+        scales: {
+          x:  { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1e293b' } },
+          y:  { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1e293b' }, title: { display: true, text: 'Daily signups', color: '#64748b', font: { size: 10 } } },
+          y2: { position: 'right', ticks: { color: '#64748b', font: { size: 10 } }, grid: { display: false }, title: { display: true, text: 'Total', color: '#64748b', font: { size: 10 } } }
         }
-        // Use no-cors to bypass CORS restriction with Google Apps Script.
-        // The request reaches the sheet even though the response is opaque.
-        // We send as text/plain (required for no-cors simple requests).
-        await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify({ name, email }),
-          headers: { 'Content-Type': 'text/plain' }
-        });
-        // With no-cors the response is opaque — show success optimistically.
-        document.getElementById('form-view').style.display = 'none';
-        document.getElementById('success-view').style.display = 'block';
-      } catch (err) {
-        errEl.textContent = 'Network error — please try again or email us at markets@d-daily-drop.in';
-        errEl.style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = 'Get My Free Brief →';
       }
     });
-  </script>
 
+  } catch(e) {
+    document.getElementById('stat-subscribers').textContent = '—';
+    document.getElementById('stat-sub-growth').textContent = 'Publish sheet to enable (see guide)';
+    console.warn('Subscribers:', e.message);
+  }
+}
+
+// ── 2. Pick Performance ───────────────────────────────────────────────────────
+async function loadPerformance(perfGid) {
+  const gid = perfGid || localStorage.getItem('ddrop_perf_gid') || '';
+  if (!gid) {
+    document.getElementById('stat-accuracy').textContent = '—';
+    document.getElementById('stat-acc-sub').textContent = 'Set Performance tab GID below';
+    document.getElementById('perf-tbody').innerHTML = '<tr><td colspan="7" class="error">Set Performance sheet GID in the URL bar after clicking the Performance tab in Google Sheets, then add it to localStorage: localStorage.setItem("ddrop_perf_gid", "YOUR_GID")</td></tr>';
+    return;
+  }
+
+  try {
+    const text = await fetchCSV(gid);
+    const rows = parseCSV(text).filter(r => r['Date'] && r['Ticker']);
+
+    // Overall accuracy
+    const withData = rows.filter(r => r['ChangePct'] !== '');
+    const wins     = withData.filter(r => r['Positive'] === 'TRUE').length;
+    const accuracy = withData.length > 0 ? Math.round(wins / withData.length * 100) : 0;
+
+    document.getElementById('stat-accuracy').textContent = accuracy + '%';
+    document.getElementById('stat-acc-sub').textContent  = `${wins}/${withData.length} picks positive`;
+
+    // Group by date for chart
+    const byDate = {};
+    rows.forEach(r => {
+      const d = r['Date'];
+      if (!byDate[d]) byDate[d] = { wins: 0, total: 0 };
+      if (r['ChangePct'] !== '') {
+        byDate[d].total++;
+        if (r['Positive'] === 'TRUE') byDate[d].wins++;
+      }
+    });
+    const accDates = Object.keys(byDate).sort().slice(-30); // last 30 days
+    const accData  = accDates.map(d => byDate[d].total > 0 ? Math.round(byDate[d].wins / byDate[d].total * 100) : null);
+
+    makeChart('chart-accuracy', {
+      type: 'line',
+      data: {
+        labels: accDates.map(d => d.slice(5)),
+        datasets: [{
+          data: accData,
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34,197,94,0.08)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#22c55e',
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        ...CHART_DEFAULTS,
+        scales: {
+          x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1e293b' } },
+          y: { min: 0, max: 100, ticks: { color: '#64748b', font: { size: 10 }, callback: v => v + '%' }, grid: { color: '#1e293b' } }
+        }
+      }
+    });
+
+    // Table — last 20 rows
+    const recent = rows.slice(-20).reverse();
+    const tbody  = document.getElementById('perf-tbody');
+    tbody.innerHTML = recent.map(r => {
+      const chg    = parseFloat(r['ChangePct']) || 0;
+      const noData = r['ChangePct'] === '';
+      const chgStr = noData ? '<span style="color:var(--muted)">N/A</span>'
+        : `<span class="${chg >= 0 ? 'up' : 'dn'}">${chg >= 0 ? '▲' : '▼'} ${Math.abs(chg).toFixed(2)}%</span>`;
+      const pill = noData
+        ? '<span class="pill pill-amber">No data</span>'
+        : r['Positive'] === 'TRUE'
+          ? '<span class="pill pill-green">Positive</span>'
+          : '<span class="pill pill-red">Negative</span>';
+      return `<tr>
+        <td style="color:var(--muted);font-size:12px">${r['Date']}</td>
+        <td style="font-family:monospace;font-weight:700">${r['Ticker']}</td>
+        <td style="color:var(--text)">${r['Name']}</td>
+        <td style="font-family:monospace;font-size:12px;color:var(--muted)">₹${r['EntryPrice']}</td>
+        <td style="font-family:monospace;font-size:12px;color:var(--muted)">${noData ? 'N/A' : '₹' + r['ExitPrice']}</td>
+        <td>${chgStr}</td>
+        <td>${pill}</td>
+      </tr>`;
+    }).join('');
+
+  } catch(e) {
+    document.getElementById('stat-accuracy').textContent = '—';
+    document.getElementById('stat-acc-sub').textContent  = 'Sheet not yet published';
+    console.warn('Performance:', e.message);
+  }
+}
+
+// ── 3. Email Sends (Resend API) ───────────────────────────────────────────────
+async function loadResendStats() {
+  const cfg = getConfig();
+  if (!cfg.resendKey || cfg.resendKey === '••••••••') {
+    document.getElementById('stat-sends').textContent   = '—';
+    document.getElementById('stat-sends-sub').textContent = 'Add Resend key above';
+    return;
+  }
+  try {
+    // Resend /emails endpoint — lists recent emails
+    const res  = await fetch('https://api.resend.com/emails?limit=100', {
+      headers: { 'Authorization': 'Bearer ' + cfg.resendKey }
+    });
+    if (!res.ok) throw new Error('Resend API ' + res.status);
+    const data = await res.json();
+    const emails = data.data || [];
+    document.getElementById('stat-sends').textContent   = emails.length >= 100 ? '100+' : emails.length.toString();
+    document.getElementById('stat-sends-sub').textContent = 'last 100 tracked';
+  } catch(e) {
+    document.getElementById('stat-sends').textContent   = '—';
+    document.getElementById('stat-sends-sub').textContent = 'CORS blocked — use n8n proxy';
+    console.warn('Resend:', e.message);
+  }
+}
+
+// ── 4. Email Opens (Apps Script) ──────────────────────────────────────────────
+async function loadOpenStats() {
+  const cfg = getConfig();
+  if (!cfg.appsScript) {
+    document.getElementById('stat-opens').textContent   = '—';
+    document.getElementById('stat-opens-sub').textContent = 'Add Apps Script URL above';
+    return;
+  }
+  try {
+    const res  = await fetch(cfg.appsScript + '?action=getOpenStats');
+    const data = await res.json();
+    document.getElementById('stat-opens').textContent   = (data.total || 0).toString();
+    document.getElementById('stat-opens-sub').textContent = 'total opens tracked';
+
+    const byDate = data.byDate || {};
+    const dates  = Object.keys(byDate).sort().slice(-14);
+    makeChart('chart-opens', {
+      type: 'bar',
+      data: {
+        labels: dates.map(d => d.slice(5)),
+        datasets: [{
+          data: dates.map(d => byDate[d]),
+          backgroundColor: 'rgba(167,139,250,0.5)',
+          borderColor: '#a78bfa',
+          borderWidth: 1
+        }]
+      },
+      options: { ...CHART_DEFAULTS }
+    });
+  } catch(e) {
+    document.getElementById('stat-opens').textContent   = '—';
+    document.getElementById('stat-opens-sub').textContent = 'Enable pixel tracking first';
+    console.warn('Opens:', e.message);
+    // Empty chart placeholder
+    makeChart('chart-opens', {
+      type: 'bar',
+      data: { labels: [], datasets: [{ data: [], backgroundColor: 'rgba(167,139,250,0.5)' }] },
+      options: { ...CHART_DEFAULTS }
+    });
+  }
+}
+
+// ── 5. n8n Execution Count ────────────────────────────────────────────────────
+async function loadN8nStats() {
+  const cfg = getConfig();
+  if (!cfg.n8nKey || cfg.n8nKey === '••••••••') return;
+  try {
+    const res = await fetch(
+      `${N8N_BASE}/api/v1/executions?workflowId=${WORKFLOW_ID}&limit=200`,
+      { headers: { 'X-N8N-API-KEY': cfg.n8nKey } }
+    );
+    if (!res.ok) throw new Error('n8n ' + res.status);
+    const data = await res.json();
+    const count = (data.data || []).length;
+    // Update sends stat if we get n8n data (more reliable than Resend)
+    if (document.getElementById('stat-sends').textContent === '—') {
+      document.getElementById('stat-sends').textContent   = count >= 200 ? '200+' : count.toString();
+      document.getElementById('stat-sends-sub').textContent = 'workflow executions';
+    }
+  } catch(e) {
+    console.warn('n8n (CORS expected if calling from browser):', e.message);
+  }
+}
+
+// ── Load All ──────────────────────────────────────────────────────────────────
+async function loadAll() {
+  document.getElementById('last-updated').textContent = 'Refreshing...';
+  const perfGid = localStorage.getItem('ddrop_perf_gid') || '';
+
+  await Promise.allSettled([
+    loadSubscribers(),
+    loadPerformance(perfGid),
+    loadResendStats(),
+    loadOpenStats(),
+    loadN8nStats()
+  ]);
+
+  const now = new Date().toLocaleTimeString();
+  document.getElementById('last-updated').textContent = 'Updated ' + now;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+populateConfigInputs();
+loadAll();
+</script>
+
+<!--
+SETUP GUIDE
+===========
+1. Google Sheets — publish to web:
+   File → Share → Publish to web → Each sheet → CSV → Publish
+   This makes the subscriber + performance CSV publicly readable.
+
+2. Performance tab GID:
+   Open your Google Sheet → click the "Performance" tab → look at the URL
+   It will end with #gid=XXXXXXXX — copy that number and run in browser console:
+   localStorage.setItem('ddrop_perf_gid', 'XXXXXXXXX')
+
+3. Apps Script URL:
+   Paste your deployed Apps Script URL in the Configuration panel above.
+   This enables email open tracking display.
+
+4. Resend API Key:
+   Found at resend.com → Settings → API Keys.
+   Note: Resend API may block browser CORS — if so, use n8n key instead.
+
+5. n8n API Key:
+   Found in your n8n instance → Settings → API → Create API Key.
+   Note: n8n API may also block CORS from browser. In that case,
+   create a small n8n workflow with a Webhook trigger that returns
+   execution stats and call that webhook URL instead.
+
+6. Host this dashboard:
+   Push this file to GitHub as docs/analytics.html
+   GitHub Pages → Settings → Pages → deploy from /docs folder
+   Keep the page private (don't link it publicly) as it shows your subscriber count.
+-->
 </body>
 </html>
